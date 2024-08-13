@@ -3,103 +3,211 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kargerbet - Sua Casa de Apostas Favorita</title>
+    <title>Login - Kargerbets</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            background: linear-gradient(135deg, #42445A 50%, #191920 50%);
+            font-family: 'Roboto', sans-serif;
             margin: 0;
-            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            color: white;
         }
         .container {
-            text-align: center;
-            padding: 50px;
-        }
-        .header {
-            background-color: #333;
-            color: #fff;
-            padding: 20px 0;
-        }
-        .header h1 {
-            margin: 0;
-        }
-        .content {
-            margin: 20px 0;
-        }
-        .content img {
-            width: 100%;
-            max-width: 600px;
+            background: #282A36;
+            padding: 30px 40px;
             border-radius: 10px;
-            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            width: 350px;
+            text-align: center;
         }
-        .download-btn {
-            display: inline-block;
-            padding: 15px 30px;
-            margin-top: 20px;
-            background-color: #28a745;
-            color: #fff;
-            text-decoration: none;
-            font-size: 18px;
+        .title {
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 25px;
+            color: #50FA7B;
+        }
+        .input-field {
+            width: 100%;
+            margin-top: 15px;
+            padding: 12px;
             border-radius: 5px;
-            transition: background-color 0.3s;
+            border: 2px solid #6272A4;
+            background: #44475A;
+            color: #f8f8f2;
+            font-size: 14px;
+            outline: none;
         }
-        .download-btn:hover {
-            background-color: #218838;
-        }
-        .footer {
-            background-color: #333;
-            color: #fff;
-            padding: 10px 0;
+        .button {
             margin-top: 20px;
+            width: 100%;
+            padding: 12px;
+            border-radius: 5px;
+            border: none;
+            background: #50FA7B;
+            color: #282A36;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .button:hover {
+            background: #40D97A;
+        }
+        .link {
+            margin-top: 20px;
+            color: #50FA7B;
+            cursor: pointer;
+            text-decoration: underline;
+            font-size: 14px;
+        }
+        #sign {
+            display: none;
+        }
+        .sign.visible {
+            display: block;
+        }
+        /* Diálogo personalizado */
+        #dialog {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #282A36;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            z-index: 10;
+            color: #f8f8f2;
+        }
+        #dialog button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background: #50FA7B;
+            color: #282A36;
+            cursor: pointer;
+            font-size: 14px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>Bem-vindo à Kargerbet!</h1>
+        <div class="title">LOGIN KARGERBETS</div>
+
+        <div id="loginForm" class="sign visible">
+            <input type="email" class="input-field" id="loginEmail" placeholder="Digite o seu e-mail" required>
+            <input type="password" class="input-field" id="loginPassword" placeholder="Digite a sua senha" required>
+            <button class="button" onclick="login()">Fazer login</button>
+            <div class="link" id="showRegisterLink">Ainda não tem conta?</div>
         </div>
-        <div class="content">
-            <img src="homek.png" alt="Kargerbet - Sua Casa de Apostas Favorita">
-            <h2>🌟 **Descubra a Emoção e a Fortuna na Kargerbet!** 🌟</h2>
 
-<p>Bem-vindo à Kargerbet, a casa de apostas que transforma cada jogo em uma aventura emocionante! Se você gosta de testar sua sorte e ganhar prêmios incríveis, está no lugar certo. 
-</p>
-
-<p>>🎰 **Slot Machines Incríveis**: Gire as bobinas e descubra bônus espetaculares. Com gráficos vibrantes e temas empolgantes, nossas slots são uma diversão sem fim!
-</p
-
-<p>🎲 **Jogo de Relota**: Uma experiência única e cheia de adrenalina. A cada rodada, sinta a emoção de se aproximar dos grandes prêmios!</p>
-
-<p>🎡 **Roleta da Sorte**: A clássica roleta com um toque especial. Coloque suas apostas e veja a roda girar, torcendo para que a bola pare no seu número da sorte.</p>
-
-<p>💰 **Ganhe até 10,000 MT por Dia**: A sorte está do seu lado! Com Kargerbet, suas chances de ganhar são reais. Imagine faturar até 10,000 MT diariamente! Não é um sonho, é Kargerbet.
-</p>
-
-<p>📈 **Por Que Escolher Kargerbet?**
-- **Segurança**: Seus dados e apostas protegidos com tecnologia de ponta.
-- **Variedade de Jogos**: Algo para todos os gostos e estilos.
-- **Suporte 24/7**: Equipe pronta para te ajudar a qualquer momento.
-</p>
-
-<p>Não perca tempo! Cadastre-se agora na Kargerbet e comece a transformar seus palpites em prêmios incríveis. A sorte sorri para quem aposta com a gente!
-
-**Kargerbet - Onde a Diversão e a Fortuna se Encontram!**</p>
-            
-            <h2>Slots Incríveis</h2>
-            <img src="slot.png" alt="Slots - Kargerbet">
-            
-            <h2>Jogo de Relota</h2>
-            <img src="roleta.png" alt="Jogo de Relota - Kargerbet">
-            
-            <h2>Número da sorte</h2>
-            <center><img src="numerodasorte.png" alt="Número da sorte - Kargerbet"></center>
-            
-            <a href="https://www.mediafire.com/file/cd4udxreb8l55vr/Kargerbet.apk/file" download="KargerbetApp.apk" class="download-btn">Baixar Kargerbet Agora</a>
-        </div>
-        <div class="footer">
-            <p>&copy; 2024 Kargerbet. Todos os direitos reservados.</p>
+        <div id="sign">
+            <input type="text" class="input-field" id="registerName" placeholder="Digite o seu nome" required>
+            <input type="email" class="input-field" id="registerEmail" placeholder="Digite o seu e-mail" required>
+            <input type="password" class="input-field" id="registerPassword" placeholder="Digite a sua senha" required>
+            <input type="text" class="input-field" id="registerPhone" placeholder="Digite o seu número de telefone" required>
+            <button class="button" onclick="register()">Cadastrar-se</button>
+            <div class="link" id="showLoginLink">Já tem uma conta? Faça login</div>
         </div>
     </div>
+
+    <!-- Diálogo personalizado -->
+    <div id="dialog">
+        <p id="dialogMessage"></p>
+        <button id="dialogOkButton">OK</button>
+    </div>
+
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
+        import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-database.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyA1zCv7UkH9mS2oQDfTQR3KGG-3ujOsxQc",
+            authDomain: "kargerbets-7364f.firebaseapp.com",
+            databaseURL: "https://kargerbets-7364f-default-rtdb.firebaseio.com",
+            projectId: "kargerbets-7364f",
+            storageBucket: "kargerbets-7364f.appspot.com",
+            messagingSenderId: "122220407167",
+            appId: "1:122220407167:web:598e87361036fe8901524a"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const database = getDatabase(app);
+
+        function showRegisterForm() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('sign').style.display = 'block';
+        }
+
+        function showLoginForm() {
+            document.getElementById('sign').style.display = 'none';
+            document.getElementById('loginForm').style.display = 'block';
+        }
+
+        function showDialog(message) {
+            document.getElementById('dialogMessage').textContent = message;
+            document.getElementById('dialog').style.display = 'block';
+        }
+
+        function closeDialog() {
+            document.getElementById('dialog').style.display = 'none';
+        }
+
+        document.getElementById("dialogOkButton").addEventListener("click", closeDialog);
+
+        window.register = function() {
+            const name = document.getElementById('registerName').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const phone = document.getElementById('registerPhone').value;
+
+            createUserWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    const user = userCredential.user;
+                    set(ref(database, 'users/' + user.uid), {
+                        username: name,
+                        email: email,
+                        phone: phone,
+                        saldo: 0.0
+                    });
+                    showDialog('Usuário registrado com sucesso!');
+                    showLoginForm();
+                })
+                .catch((error) => {
+                    showDialog(`Erro no registro: ${error.message}`);
+                });
+        }
+
+        window.login = function() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            signInWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    showDialog("Sucesso no login!");
+                    setTimeout(() => {
+                        closeDialog();
+                        window.location.href = "casa.html";
+                    }, 1500);
+                })
+                .catch((error) => {
+                    showDialog("Erro no login. Verifique os dados e tente novamente.");
+                });
+        }
+
+        document.getElementById("showRegisterLink").addEventListener("click", showRegisterForm);
+        document.getElementById("showLoginLink").addEventListener("click", showLoginForm);
+    </script>
 </body>
 </html>

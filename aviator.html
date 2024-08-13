@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fortune Tiger Casino</title>
+    <style>
+        body {
+            margin: 0;
+            background: #42445A;
+            font-family: Arial, sans-serif;
+            color: white;
+            overflow: hidden;
+        }
+        .container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+        .saldo {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 18px;
+        }
+        .history {
+            position: absolute;
+            top: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 5px;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        .history-item {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+        }
+        .game-area {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        .tiger {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: url('avia.png') no-repeat center center / contain;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        } 
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+        }
+        .controls input {
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+            margin: 5px;
+            width: 150px;
+        }
+        .controls button {
+            padding: 10px 20px;
+            border-radius: 5px;
+            border: none;
+            background: #0015FF;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .multiplier {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 24px;
+            font-weight: bold;
+            color: yellow;
+        }
+        .withdrawal {
+            display: none;
+            font-size: 18px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="saldo">Saldo: <span id="saldo">1000.0</span></div>
+        <div class="history" id="history"></div>
+        <div class="game-area" id="gameArea">
+            <div class="tiger" id="tiger">
+                <div class="multiplier" id="multiplier">1X</div>
+            </div>
+        </div>
+        <div class="controls">
+            <input type="number" id="betAmount" placeholder="Valor da aposta">
+            <button id="actionButton" onclick="handleAction()">Apostar</button>
+            <div class="withdrawal" id="withdrawalInfo"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
+        import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-database.js";
+    
+        const firebaseConfig = {
+          apiKey: "AIzaSyA1zCv7UkH9mS2oQDfTQR3KGG-3ujOsxQc",
+          authDomain: "kargerbets-7364f.firebaseapp.com",
+          databaseURL: "https://kargerbets-7364f-default-rtdb.firebaseio.com",
+          projectId: "kargerbets-7364f",
+          storageBucket: "kargerbets-7364f.appspot.com",
+          messagingSenderId: "122220407167",
+          appId: "1:122220407167:web:598e87361036fe8901524a"
+        };
+    
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const database = getDatabase(app);
+    
+        
+        const saldoText = document.getElementById('saldo');
+        
+    
+        function updatesaldo(newsaldo) {
+          const user = auth.currentUser;
+          if (user) {
+            const userId = user.uid;
+            const userRef = ref(database, `users/${userId}/saldo`);
+            set(userRef, newsaldo).then(() => {
+              console.log('Saldo atualizado no Firebase:', newsaldo);
+            }).catch((error) => {
+              console.error('Erro ao atualizar o saldo no Firebase:', error);
+            });
+          }
+        }
+    
+        function fetchsaldo() {
+          const user = auth.currentUser;
+          if (user) {
+            const userId = user.uid;
+            const userRef = ref(database, `users/${userId}/saldo`);
+            onValue(userRef, (snapshot) => {
+              const data = snapshot.val();
+              if (data !== null) {
+                saldo = data;
+                saldoText.textContent = saldo.toFixed(1);
+                console.log('Saldo obtido do Firebase:', saldo);
+              } else {
+                saldo = 0.0;
+                saldoText.textContent = saldo.toFixed(1);
+              }
+            }); 
+          } else {
+            alert("Usuário não autenticado. Redirecionando para a página de login...");
+            window.location.href = "index.html";
+          }
+        }
+    
+        onAuthStateChanged(auth, (user) => {
+          if (user) {
+            fetchsaldo();
+          } else {
+            alert("Usuário não autenticado. Redirecionando para a página de login...");
+            window.location.href = "index.html";
+          }
+        });
+        
+        
+        
+        
+        let saldo = -10;
+        let multiplier = 1.0;
+        let tigerAnimation;
+        let history = [];
+        let betAmount = 0;
+        let currentMultiplier = 1;
+        let gameActive = false;
+        let gameStartTime;
+        const speed = 1; // Velocidade inicial do tigre
+
+        function animateTiger() {
+            const gameAreaWidth = document.getElementById('gameArea').offsetWidth;
+            const gameAreaHeight = document.getElementById('gameArea').offsetHeight;
+
+            let x = 0;
+            let y = 0;
+            let angle = 45; // Ângulo de voo em graus
+
+            tigerAnimation = setInterval(() => {
+                x += speed * Math.cos(angle * Math.PI / 180);
+                y -= speed * Math.sin(angle * Math.PI / 180);
+
+                if (x > gameAreaWidth || y > gameAreaHeight || x < -tiger.offsetWidth || y < -tiger.offsetHeight) {
+                    clearInterval(tigerAnimation);
+                    resetTigerPosition();
+                    animateTiger();
+                } else {
+                    tiger.style.left = `${50 + x / gameAreaWidth * 100}%`;
+                    tiger.style.top = `${50 + y / gameAreaHeight * 100}%`;
+                }
+            }, 16);
+        }
+
+        function startMultiplier() {
+            gameStartTime = Date.now();
+            const targetMultiplier = Math.random() < 0.27 ? Math.random() * 10 + 3 : Math.random() * 2 + 1; // Chance para 3X-10X é 27%
+            const increment = (targetMultiplier - multiplier) / 100;
+            const interval = setInterval(() => {
+                multiplier += increment;
+                multiplierText.textContent = `${multiplier.toFixed(2)}X`;
+
+                if (multiplier >= targetMultiplier) {
+                    clearInterval(interval);
+                    clearInterval(tigerAnimation);
+                    addHistory(multiplier.toFixed(2));
+                    actionButton.textContent = 'Apostar';
+                    withdrawalInfo.style.display = 'none';
+                    gameActive = false;
+                    resetTigerPosition();
+                }
+            }, 100);
+        }
+
+        function addHistory(value) {
+            const historyItem = document.createElement('div');
+            historyItem.textContent = `${value}X`;
+            historyItem.classList.add('history-item');
+
+            if (value >= 10) {
+                historyItem.style.backgroundColor = 'pink';
+            } else if (value >= 2) {
+                historyItem.style.backgroundColor = 'purple';
+            } else {
+                historyItem.style.backgroundColor = 'blue';
+            }
+
+            historyText.prepend(historyItem);
+            if (historyText.childElementCount > 10) {
+                historyText.removeChild(historyText.lastChild);
+            }
+        }
+
+        function handleAction() {
+            const betAmountInputValue = parseFloat(betAmountInput.value);
+            if (actionButton.textContent === 'Apostar') {
+                if (betAmountInputValue > 0 && betAmountInputValue <= saldo) {
+                    betAmount = betAmountInputValue;
+                    saldo -= betAmount;
+                    saldoText.textContent = saldo.toFixed(1);
+                    resetGame();
+                    animateTiger();
+                    startMultiplier();
+                    gameActive = true;
+                    actionButton.textContent = 'Sacar';
+                } else {
+                    alert('Saldo insuficiente ou valor de aposta inválido.');
+                }
+            } else if (actionButton.textContent === 'Sacar') {
+                if (gameActive) {
+                    saldo += betAmount * multiplier;
+                    saldoText.textContent = saldo.toFixed(1);
+                    betAmount = 0;
+                    withdrawalInfo.style.display = 'none';
+                    actionButton.textContent = 'Apostar';
+                    clearInterval(tigerAnimation);
+                    resetGame();
+                    gameActive = false;
+                }
+            }
+        }
+
+        function resetTigerPosition() {
+            tiger.style.left = '50%';
+            tiger.style.top = '50%';
+            tiger.style.transform = 'translate(-50%, -50%)';
+        }
+
+        function resetGame() {
+            resetTigerPosition();
+            multiplier = 1.0;
+            multiplierText.textContent = '1X';
+            clearInterval(tigerAnimation);
+        }
+
+        animateTiger();
+    </script>
+</body>
+</html>

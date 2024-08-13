@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Double Casino</title>
+  <style>
+    body {
+      margin: 0;
+      background: #42445A;
+      font-family: Arial, sans-serif;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .container {
+      text-align: center;
+    }
+
+    .balance {
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+
+    .wheel {
+      position: relative;
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      border: 5px solid #fff;
+      margin: 0 auto 20px;
+    }
+
+    .wheel .slice {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      clip-path: polygon(50% 50%, 100% 0, 100% 100%);
+      transform-origin: 50% 50%;
+    }
+
+    .slice.red {
+      background: red;
+    }
+
+    .slice.black {
+      background: black;
+    }
+
+    .slice.white {
+      background: white;
+    }
+
+    .red {
+      transform: rotate(0deg);
+    }
+
+    .black {
+      transform: rotate(120deg);
+    }
+
+    .white {
+      transform: rotate(240deg);
+    }
+
+    .bet-options {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .bet-options button {
+      padding: 10px 20px;
+      margin: 0 10px;
+      font-size: 16px;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    .bet-red {
+      background: red;
+      color: white;
+    }
+
+    .bet-black {
+      background: black;
+      color: white;
+    }
+
+    .bet-white {
+      background: white;
+      color: black;
+    }
+
+    .controls {
+      margin-top: 20px;
+    }
+
+    .controls input {
+      padding: 10px;
+      border-radius: 5px;
+      border: none;
+      margin: 5px;
+      width: 150px;
+      text-align: center;
+    }
+
+    .controls button {
+      padding: 10px 20px;
+      border-radius: 5px;
+      border: none;
+      background: #0015FF;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .dialog-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      display: none;
+    }
+
+    .dialog {
+      background: #fff;
+      color: #000;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      width: 300px;
+    }
+
+    .dialog p {
+      margin-bottom: 20px;
+    }
+
+    .dialog button {
+      padding: 10px 20px;
+      border: none;
+      background: #0015FF;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="balance">Saldo: <span id="balance">-10</span></div>
+    <div class="wheel">
+      <div class="slice red red"></div>
+      <div class="slice black black"></div>
+      <div class="slice white white"></div>
+    </div>
+    <div class="bet-options">
+      <button class="bet-red" onclick="placeBet('red')">Apostar no Vermelho</button>
+      <button class="bet-black" onclick="placeBet('black')">Apostar no Preto</button>
+      <button class="bet-white" onclick="placeBet('white')">Apostar no Branco</button>
+    </div>
+    <div class="controls">
+      <input type="number" id="betAmount" placeholder="Valor da aposta">
+      <button onclick="spinWheel()">Girar</button>
+    </div>
+  </div>
+
+  <div id="dialogOverlay" class="dialog-overlay">
+    <div class="dialog">
+      <p id="dialogMessage"></p>
+      <button onclick="closeDialog()">OK</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
+    import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyA1zCv7UkH9mS2oQDfTQR3KGG-3ujOsxQc",
+      authDomain: "kargerbets-7364f.firebaseapp.com",
+      databaseURL: "https://kargerbets-7364f-default-rtdb.firebaseio.com",
+      projectId: "kargerbets-7364f",
+      storageBucket: "kargerbets-7364f.appspot.com",
+      messagingSenderId: "122220407167",
+      appId: "1:122220407167:web:598e87361036fe8901524a"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const database = getDatabase(app);
+
+    let balance = 0.0;
+    let currentBet = null;
+    let betAmount = 0;
+    const balanceText = document.getElementById('balance');
+    const betAmountInput = document.getElementById('betAmount');
+    const dialogOverlay = document.getElementById('dialogOverlay');
+    const dialogMessage = document.getElementById('dialogMessage');
+
+    function updateBalance(newBalance) {
+      const user = auth.currentUser;
+      if (user) {
+        const userId = user.uid;
+        const userRef = ref(database, `users/${userId}/saldo`);
+        set(userRef, newBalance).then(() => {
+          console.log('Saldo atualizado no Firebase:', newBalance);
+        }).catch((error) => {
+          console.error('Erro ao atualizar o saldo no Firebase:', error);
+        });
+      }
+    }
+
+    function fetchBalance() {
+      const user = auth.currentUser;
+      if (user) {
+        const userId = user.uid;
+        const userRef = ref(database, `users/${userId}/saldo`);
+        onValue(userRef, (snapshot) => {
+          const data = snapshot.val();
+          if (data !== null) {
+            balance = data;
+            balanceText.textContent = balance.toFixed(1);
+            console.log('Saldo obtido do Firebase:', balance);
+          } else {
+            balance = 0.0;
+            balanceText.textContent = balance.toFixed(1);
+          }
+        }); 
+      } else {
+        alert("Usuário não autenticado. Redirecionando para a página de login...");
+        window.location.href = "index.html";
+      }
+    }
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        fetchBalance();
+      } else {
+        alert("Usuário não autenticado. Redirecionando para a página de login...");
+        window.location.href = "index.html";
+      }
+    });
+
+    function placeBet(color) {
+      currentBet = color;
+      showDialog(`Você colocou uma aposta no ${color === 'red' ? 'Vermelho' : color === 'black' ? 'Preto' : 'Branco'}`);
+    }
+ 
+    function spinWheel() {
+      betAmount = parseFloat(betAmountInput.value);
+      if (betAmount > 0 && betAmount <= balance && currentBet) {
+        balance -= betAmount;
+        balanceText.textContent = balance.toFixed(1);
+        updateBalance(balance);
+
+        const random = Math.random();
+        const result = random < 0.45 ? 'red' : random < 0.9 ? 'black' : 'white';
+        showDialog(`O resultado é ${result === 'red' ? 'Vermelho' : result === 'black' ? 'Preto' : 'Branco'}`);
+
+        if (result === currentBet) {
+          const winnings = currentBet === 'white' ? betAmount * 14 : betAmount * 2;
+          balance += winnings;
+          showDialog(`Você ganhou ${winnings.toFixed(1)}! Seu novo saldo é ${balance.toFixed(1)}`);
+          updateBalance(balance);
+        } else {
+          showDialog(`Você perdeu! Seu novo saldo é ${balance.toFixed(1)}`);
+        }
+
+                balanceText.textContent = balance.toFixed(1);
+        currentBet = null;
+        betAmountInput.value = '';
+      } else {
+        showDialog('Aposta inválida ou saldo insuficiente.');
+      }
+    }
+
+    function showDialog(message) {
+      dialogMessage.textContent = message;
+      dialogOverlay.style.display = 'flex';
+    }
+
+    function closeDialog() {
+      dialogOverlay.style.display = 'none';
+    }
+  </script>
+</body>
+
+</html>

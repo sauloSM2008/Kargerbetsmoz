@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mines Jogo</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            position: relative;
+        }
+        .controls {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .controls label, .controls select, .controls input {
+            font-size: 16px;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+        }
+        .controls select, .controls input {
+            background-color: #3498db;
+            color: white;
+            cursor: pointer;
+        }
+        .controls input {
+            width: 80px;
+        }
+        #tabuleiro {
+            display: grid;
+            grid-template-columns: repeat(5, 50px);
+            grid-gap: 5px;
+        }
+        .cell {
+            width: 50px;
+            height: 50px;
+            background-color: #3498db;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+        .cell:hover {
+            transform: scale(1.1);
+        }
+        .cell.revealed {
+            background-color: #ecf0f1;
+            cursor: default;
+        }
+        .cell.mine {
+            background-color: #e74c3c;
+        }
+        .cell.safe {
+            background-color: #2ecc71;
+        }
+        #mensagem {
+            margin-top: 20px;
+            font-size: 18px;
+            text-align: center;
+        }
+        #saldo {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 18px;
+        }
+        .start-button-container {
+            margin-top: 20px;
+        }
+        .start-button-container button {
+            font-size: 16px;
+            padding: 10px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .start-button-container button:hover {
+            background-color: #c0392b;
+        }
+    </style>
+</head>
+<body>
+    <div id="saldo">Saldo MZN: </div>
+    <div class="controls">
+        <label for="numMinas">Número de minas:</label>
+        <select id="numMinas">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10">10</option>
+            <option value="11">11</option>
+            <option value="12">12</option>
+            <option value="13">13</option>
+            <option value="14">14</option>
+            <option value="15">15</option>
+            <option value="16">16</option>
+            <option value="17">17</option>
+            <option value="18">18</option>
+            <option value="19">19</option>
+            <option value="20">20</option>
+        </select>
+        <label for="valorAposta">Valor da aposta:</label>
+        <input type="number" id="valorAposta" value="10" min="2">
+    </div>
+    <div id="tabuleiro"></div>
+    <div class="start-button-container">
+        <button onclick="inicializarTabuleiro()">Iniciar Jogo</button>
+    </div>
+    <div id="mensagem"></div>
+
+   
+    <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
+    import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyA1zCv7UkH9mS2oQDfTQR3KGG-3ujOsxQc",
+      authDomain: "kargerbets-7364f.firebaseapp.com",
+      databaseURL: "https://kargerbets-7364f-default-rtdb.firebaseio.com",
+      projectId: "kargerbets-7364f",
+      storageBucket: "kargerbets-7364f.appspot.com",
+      messagingSenderId: "122220407167",
+      appId: "1:122220407167:web:598e87361036fe8901524a"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const database = getDatabase(app);
+
+    let saldo = 0.0;
+    const saldoText = document.getElementById('saldo');
+    
+
+    function updatesaldo(newsaldo) {
+      const user = auth.currentUser;
+      if (user) {
+        const userId = user.uid;
+        const userRef = ref(database, `users/${userId}/saldo`);
+        set(userRef, newsaldo).then(() => {
+          console.log('Saldo atualizado no Firebase:', newsaldo);
+        }).catch((error) => {
+          console.error('Erro ao atualizar o saldo no Firebase:', error);
+        });
+      }
+    }
+
+    function fetchsaldo() {
+      const user = auth.currentUser;
+      if (user) {
+        const userId = user.uid;
+        const userRef = ref(database, `users/${userId}/saldo`);
+        onValue(userRef, (snapshot) => {
+          const data = snapshot.val();
+          if (data !== null) {
+            saldo = data;
+            saldoText.textContent = saldo.toFixed(1);
+            console.log('Saldo obtido do Firebase:', saldo);
+          } else {
+            saldo = 0.0;
+            saldoText.textContent = saldo.toFixed(1);
+          }
+        }); 
+      } else {
+        alert("Usuário não autenticado. Redirecionando para a página de login...");
+        window.location.href = "index.html";
+      }
+    }
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        fetchsaldo();
+      } else {
+        alert("Usuário não autenticado. Redirecionando para a página de login...");
+        window.location.href = "index.html";
+      }
+    });
+
+            
+        const linhas = 5;
+        const colunas = 5;
+        let numMinas = 5;
+        
+        let tabuleiro = [];
+        const tabuleiroElement = document.getElementById('tabuleiro');
+        const mensagem = document.getElementById('mensagem');
+        const numMinasSelect = document.getElementById('numMinas');
+        const saldoElement = document.getElementById('saldo');
+        const valorApostaInput = document.getElementById('valorAposta');
+
+        function inicializarTabuleiro() {
+            numMinas = parseInt(numMinasSelect.value);
+            const valorAposta = parseInt(valorApostaInput.value);
+            
+            if (valorAposta > saldo) {
+                mensagem.textContent = 'Saldo insuficiente!';
+                ;
+            }
+
+            saldo -= valorAposta;
+            saldoElement.textContent = `Saldo MZN: ${saldo}`;
+
+            tabuleiro = [];
+            tabuleiroElement.innerHTML = '';
+            mensagem.textContent = '';
+
+            // Inicializa o tabuleiro
+            for (let i = 0; i < linhas; i++) {
+                const linha = [];
+                for (let j = 0; j < colunas; j++) {
+                    linha.push({ mina: false, revelada: false });
+                    const cellElement = document.createElement('div');
+                    cellElement.classList.add('cell');
+                    cellElement.dataset.linha = i;
+                    cellElement.dataset.coluna = j;
+                    cellElement.addEventListener('click', revelarCelula);
+                    tabuleiroElement.appendChild(cellElement);
+                }
+                tabuleiro.push(linha);
+            }
+
+            // Coloca as minas no tabuleiro
+            let minasColocadas = 0;
+            while (minasColocadas < numMinas) {
+                const linha = Math.floor(Math.random() * linhas);
+                const coluna = Math.floor(Math.random() * colunas);
+                if (!tabuleiro[linha][coluna].mina) {
+                    tabuleiro[linha][coluna].mina = true;
+                    minasColocadas++;
+                }
+            }
+        }
+
+        function revelarCelula(event) {
+            const linha = event.target.dataset.linha;
+            const coluna = event.target.dataset.coluna;
+            const cell = tabuleiro[linha][coluna];
+
+            if (cell.revelada) return;
+
+            cell.revelada = true;
+            event.target.classList.add('revealed');
+            if (cell.mina) {
+                event.target.classList.add('mine');
+                mensagem.textContent = 'Game Over! Você encontrou uma mina!';
+                revelarTodasAsMinas();
+                setTimeout(inicializarTabuleiro, 2000);
+            } else {
+                event.target.classList.add('safe');
+                mensagem.textContent = 'Você está seguro!';
+            }
+        }
+
+        function revelarTodasAsMinas() {
+            for (let i = 0; i < linhas; i++) {
+                for (let j = 0; j < colunas; j++) {
+                    if (tabuleiro[i][j].mina) {
+                        const cellElement = tabuleiroElement.querySelector(`[data-linha="${i}"][data-coluna="${j}"]`);
+                        cellElement.classList.add('mine');
+                    }
+                }
+            }
+        }
+
+        inicializarTabuleiro();
+    </script>
+</body>
+</html>

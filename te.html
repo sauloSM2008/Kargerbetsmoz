@@ -1,0 +1,145 @@
+```html
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Deposito Kargerbet</title>
+</head>
+
+<style>
+  body {
+    background: #42445A;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    height: 100vh;
+  }
+
+  .container {
+    background: #42445A;
+    border-radius: 3px;
+    border: 3px solid #474E9D;
+  }
+
+  .tra {
+    background: #767DC9;
+    border: none;
+    border-radius: 3px;
+    border: 1px solid #474E9D;
+    width: 70%;
+    padding: 8px;
+    margin-bottom: 8px;
+  }
+
+  .btn {
+    margin-bottom: 8px;
+    border: none;
+    background: #767DC9;
+    border-radius: 3px;
+    width: 50%;
+    height: 35px;
+    border: 1px solid #474E9D;
+  }
+
+  #dialog {
+    background: #191920;
+    border: 3px solid #474E9D;
+    transform: translate(-50%, -50%);
+    top: 50%;
+    left: 50%;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    position: fixed;
+    display: none;
+    width: 80%;
+    border-radius: 8px;
+  }
+
+  #btnn {
+    margin-bottom: 8px;
+    border: none;
+    background: #767DC9;
+    border-radius: 3px;
+    width: 50%;
+    height: 35px;
+    border: 1px solid #474E9D;
+  }
+</style>
+
+<body>
+
+  <center><div id="dialog">
+      <h style="color: white; font-weight: bold; font-size: 15px">AGUARDAR</h>
+      <p style="color: white; font-weight: bold; font-size: 12px">O seu pedido está sendo processado aguarde no máximo 5 minutos</p>
+
+      <button id="btnn">OK</button>
+    </center>
+
+  </div>
+
+  <div class="container">
+
+    <center>
+      <h style="color: white; font-weight: bold; font-size: 12; text-align: center">Faça levantamento</h>
+      <p style="color: white">Minimo levantamento - 50MT</p>
+      <p style="color: white">Maximo levantamento - 25000MT</p>
+
+      <h style="color: white; font-weight: bold; font-size: 12px">MELHOR CASA DE APOSTA</h>
+
+      <input class="tra" type="number" placeholder="Digite o valor que desejas levantar" required>
+
+      <button class="btn" id="btn">CONFIRMAR</button>
+
+    </center>
+
+  </div>
+  <script>
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "firebase/app";
+    import { getFirestore, collection, addDoc } from 'firebase/firestore';
+
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyA1zCv7UkH9mS2oQDfTQR3KGG-3ujOsxQc",
+      authDomain: "kargerbets-7364f.firebaseapp.com",
+      databaseURL: "https://kargerbets-7364f-default-rtdb.firebaseio.com",
+      projectId: "kargerbets-7364f",
+      storageBucket: "kargerbets-7364f.appspot.com",
+      messagingSenderId: "122220407167",
+      appId: "1:122220407167:web:598e87361036fe8901524a"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+
+    document.getElementById("btn").addEventListener("click", function() {
+      let valorDigitado = document.querySelector(".tra").value;
+
+      enviarDadosParaFirebase(valorDigitado);
+    });
+
+    function enviarDadosParaFirebase(valorDigitado) {
+      const db = getFirestore(app);
+      const usersCollection = collection(db, "suaColecao");
+
+      addDoc(usersCollection, {
+        valor: valorDigitado
+      })
+        .then((docRef) => {
+          console.log("Documento criado com ID:", docRef.id);
+        })
+        .catch((error) => {
+          console.error("Erro ao adicionar documento:", error);
+        });
+    }
+
+    document.getElementById("btnn").addEventListener("click",
+      function() {
+        document.getElementById("dialog").style.display = "none"
+      });
+  </script>
+
+</body>
+
+</html>

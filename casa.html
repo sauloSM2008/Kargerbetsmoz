@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kargerbets</title>
+  <style>
+    body {
+      background: #373949;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 0;
+      padding: 0;
+    }
+
+    .user-info {
+      background: #000000;
+      width: 80%;
+      padding: 20px;
+      margin: 20px auto;
+      color: white;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    .user-info h2 {
+      margin: 0 0 10px;
+    }
+
+    .user-info p {
+      margin: 5px 0;
+    }
+
+    .cont {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-evenly;
+      width: 80%;
+      flex-wrap: wrap;
+    }
+
+    .column {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      width: 45%;
+    }
+
+    .casa {
+      background: #000000;
+      padding: 20px;
+      border-radius: 10px;
+      margin-top: 30px;
+      text-align: center;
+    }
+
+    .casa img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    #cent {
+      background: #000000;
+      width: 80%;
+      padding: 5%;
+      margin: 0 auto;
+      text-align: center;
+      color: white;
+      border: none;
+    }
+
+    h1 {
+      color: white;
+      font-weight: bold;
+      text-align: center;
+      font-size: 4vw;
+      margin: 0;
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 6vw;
+      }
+    }
+
+    /* Estilos para as caixas de diálogo */
+    .dialog-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      display: none;
+    }
+
+    .dialog {
+      background: #fff;
+      color: #000;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      width: 300px;
+    }
+
+    .dialog p {
+      margin-bottom: 20px;
+    }
+
+    .dialog button {
+      padding: 10px 20px;
+      border: none;
+      background: #0015FF;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    
+    .buttons {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .button {
+      background: #0015FF;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      margin: 0 10px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="user-info">
+    <h2>Informações do Usuário</h2>
+    <p>Nome: <span id="userName">...</span></p>
+    <p>E-mail: <span id="userEmail">...</span></p>
+    <p>Número: <span id="userNumber">...</span></p>
+    <p>Saldo: <span id="userSaldo">...</span></p>
+  </div>
+  
+  
+  <div class="buttons">
+    <a href="dep.html" class="button">Depositar</a>
+    <a href="te.html" class="button">Levantar</a>
+  </div>
+  
+  <main class="cont">
+    <div class="column">
+      <div class="casa">
+        <h1>AVIATOR</h1>
+        <img onclick="aviator()" src="avi.png" alt="Aviator">
+      </div>
+
+      <div class="casa">
+        <h1>MINES</h1>
+        <img onclick="mine()" src="min.png" alt="Mines Bomba">
+      </div>
+    </div>
+
+    <div class="column">
+      <div class="casa">
+        <h1>DOUBLE</h1>
+        <img onclick="doubleGame()" src="fort1.png" alt="Double">
+      </div>
+
+      <div class="casa">
+        <h1>ROLATA</h1>
+        <img onclick="roulette()" src="role.jpeg" alt="Roleta da Sorte">
+      </div>
+    </div>
+  </main>
+
+  <!-- Caixa de diálogo -->
+  <div id="dialogOverlay" class="dialog-overlay">
+    <div class="dialog">
+      <p id="dialogMessage"></p>
+      <button onclick="closeDialog()">OK</button>
+    </div>
+  </div>
+
+  <script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-database.js";
+
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyA1zCv7UkH9mS2oQDfTQR3KGG-3ujOsxQc",
+        authDomain: "kargerbets-7364f.firebaseapp.com",
+        databaseURL: "https://kargerbets-7364f-default-rtdb.firebaseio.com",
+        projectId: "kargerbets-7364f",
+        storageBucket: "kargerbets-7364f.appspot.com",
+        messagingSenderId: "122220407167",
+        appId: "1:122220407167:web:598e87361036fe8901524a"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp (firebaseConfig);
+    const auth = getAuth(app);
+    const database = getDatabase(app);
+
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            const userId = user.uid;
+            const userRef = ref(database, 'users/' + userId);
+            onValue(userRef, (snapshot) => {
+                const data = snapshot.val();
+                document.getElementById('userName').textContent = data.username;
+                document.getElementById('userEmail').textContent = data.email;
+                document.getElementById('userNumber').textContent = data.phone;
+                document.getElementById('userSaldo').textContent = data.saldo;
+            });
+        } else {
+            // User is signed out
+            alert("Usuário não autenticado. Redirecionando para a página de login...");
+            window.location.href = "index.html";
+        }
+    });
+
+    // Expose functions to global scope
+    window.mine = function() {
+      window.location.href = "mines.html";
+    }
+
+    window.aviator = function() {
+      window.location.href = "aviator.html";
+    }
+
+    window.doubleGame = function() {
+      window.location.href = "tinge.html";
+    }
+
+    window.roulette = function() {
+      window.location.href = "roleta.html";
+    }
+
+    window.showDialog = function(message) {
+      const dialogMessage = document.getElementById('dialogMessage');
+      const dialogOverlay = document.getElementById('dialogOverlay');
+      dialogMessage.textContent = message;
+      dialogOverlay.style.display = 'flex';
+    }
+
+    window.closeDialog = function() {
+      const dialogOverlay = document.getElementById('dialogOverlay');
+      dialogOverlay.style.display = 'none';
+    }
+  </script>
+</body>
+</html>
